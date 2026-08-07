@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Match — сильный отклик за 60 секунд</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ЭКРАН: старт -->
+    <section class="screen" id="screen-start">
+      <div class="ring-hero">
+        <svg viewBox="0 0 120 120" class="ring-svg">
+          <circle cx="60" cy="60" r="52" class="ring-bg"/>
+          <circle cx="60" cy="60" r="52" class="ring-fg" id="hero-ring"/>
+        </svg>
+        <div class="ring-label">MATCH</div>
+      </div>
+      <h1>Отклик, который читают<br/>до конца</h1>
+      <p class="subtitle">Вставь резюме и вакансию — за 60 секунд получи отклик, сопроводительное письмо и точные правки под эту вакансию.</p>
+      <button class="btn-primary" id="btn-start">Начать</button>
+      <div class="limit-hint" id="limit-hint"></div>
+    </section>
+
+    <!-- ЭКРАН: ввод резюме -->
+    <section class="screen hidden" id="screen-resume">
+      <div class="step-eyebrow">Шаг 1 из 2</div>
+      <h2>Вставь текст резюме</h2>
+      <p class="subtitle">Скопируй из PDF, hh.ru или LinkedIn — форматирование не важно.</p>
+      <textarea id="input-resume" placeholder="Например: Иван Иванов. Frontend-разработчик, 2 года опыта. React, TypeScript..."></textarea>
+      <button class="btn-primary" id="btn-to-vacancy">Дальше</button>
+    </section>
+
+    <!-- ЭКРАН: ввод вакансии -->
+    <section class="screen hidden" id="screen-vacancy">
+      <div class="step-eyebrow">Шаг 2 из 2</div>
+      <h2>Вставь текст вакансии</h2>
+      <p class="subtitle">Скопируй описание вакансии целиком — требования особенно важны.</p>
+      <textarea id="input-vacancy" placeholder="Например: Требуется Frontend-разработчик. Опыт с React от 2 лет..."></textarea>
+      <button class="btn-primary" id="btn-generate">Собрать отклик ✨</button>
+    </section>
+
+    <!-- ЭКРАН: загрузка -->
+    <section class="screen hidden" id="screen-loading">
+      <div class="spinner"></div>
+      <p class="loading-text" id="loading-text">Читаю резюме и вакансию…</p>
+    </section>
+
+    <!-- ЭКРАН: результат -->
+    <section class="screen hidden" id="screen-result">
+      <div class="result-header">
+        <div class="ring-hero small">
+          <svg viewBox="0 0 120 120" class="ring-svg">
+            <circle cx="60" cy="60" r="52" class="ring-bg"/>
+            <circle cx="60" cy="60" r="52" class="ring-fg" id="result-ring"/>
+          </svg>
+          <div class="ring-score" id="result-score">—</div>
+        </div>
+        <div>
+          <div class="step-eyebrow">Совпадение с вакансией</div>
+          <div id="score-caption" class="score-caption"></div>
+        </div>
+      </div>
+
+      <div class="card" id="card-cover">
+        <div class="card-title">Готовый отклик</div>
+        <div class="card-body" id="out-cover-message"></div>
+        <button class="btn-copy" data-copy="out-cover-message">Скопировать</button>
+      </div>
+
+      <div class="card" id="card-letter">
+        <div class="card-title">Сопроводительное письмо</div>
+        <div class="card-body" id="out-cover-letter"></div>
+        <button class="btn-copy" data-copy="out-cover-letter">Скопировать</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Сильные тезисы</div>
+        <ul class="list-good" id="out-strong"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Что убрать/поправить</div>
+        <ul class="list-bad" id="out-weak"></ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Правки резюме под вакансию</div>
+        <ul class="list-neutral" id="out-edits"></ul>
+      </div>
+
+      <div class="card" id="card-recruiter">
+        <div class="card-title">Сообщение рекрутеру</div>
+        <div class="card-body" id="out-recruiter"></div>
+        <button class="btn-copy" data-copy="out-recruiter">Скопировать</button>
+      </div>
+
+      <div class="card" id="card-followup">
+        <div class="card-title">Фоллоуап через 2-3 дня</div>
+        <div class="card-body" id="out-followup"></div>
+        <button class="btn-copy" data-copy="out-followup">Скопировать</button>
+      </div>
+
+      <div class="share-row">
+        <button class="btn-secondary" id="btn-share">Отправить другу</button>
+        <button class="btn-secondary" id="btn-again">Новый отклик</button>
+      </div>
+      <div class="brand-signature" id="brand-signature">собрано в Match ⚡️</div>
+    </section>
+
+    <!-- ЭКРАН: лимит исчерпан / paywall -->
+    <section class="screen hidden" id="screen-paywall">
+      <h2>Бесплатные генерации на сегодня закончились</h2>
+      <p class="subtitle">Возвращайся завтра — лимит обновится. Или открой безлимит прямо сейчас.</p>
+
+      <div class="plan-card" id="plan-pack">
+        <div class="plan-title">10 откликов</div>
+        <div class="plan-price" id="price-pack">— ⭐</div>
+        <div class="plan-desc">Разовый пакет, без подписки</div>
+      </div>
+
+      <div class="plan-card highlighted" id="plan-week">
+        <div class="plan-badge">Выгоднее</div>
+        <div class="plan-title">Безлимит на 7 дней</div>
+        <div class="plan-price" id="price-week">— ⭐</div>
+        <div class="plan-desc">Без ограничений на генерации</div>
+      </div>
+
+      <div class="paywall-hint">Пригласи 3 друзей — получи 3 отклика бесплатно, без оплаты 🎁</div>
+      <button class="btn-secondary" id="btn-invite-from-paywall">Пригласить друзей</button>
+    </section>
+
+  </div>
+  <script src="/app.js"></script>
+</body>
+</html>
